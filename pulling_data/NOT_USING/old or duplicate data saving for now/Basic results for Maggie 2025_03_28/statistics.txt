@@ -1,0 +1,10 @@
+Crude calculations from March 28 2025
+    - Crude referring to that calculations are all performed from start to finish of data collection so no periods of inactivity like setting up experiment or forgetting to turn the equipment off imediately are not excluded
+
+Session 1's statistics 
+    "fmax"        "favg"        "std"         "var"         "session length"
+    "14.99394"    "1.391169"    "1.946354"    "3.788295"    "999.117" 
+
+Session 2's statistics 
+    "fmax"         "favg"          "std"           "var"           "session length"
+    "11.247993"    "0.27365961"    "0.76215396"    "0.58087866"    "1182.199"  
