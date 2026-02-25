@@ -1,0 +1,7 @@
+# MATLAB temporary files
+*.asv
+*.fig
+*.mlappinstall
+*.slx
+*.mdl
+*.mex*

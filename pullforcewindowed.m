@@ -4,10 +4,13 @@ close all
 clc
 clear
 
+projectRoot = fileparts(mfilename('fullpath'));
+cd(projectRoot)
+
 LBS_TO_KG = 0.453592;
 
 %-----------------------------------------------------------
-doyouwantstatsonly  = 0; % 1 for yes, 0 for no. Basically option to choose to skip graphing them
+doyouwantstatsonly  = 1; % 1 for yes, 0 for no. Basically option to choose to skip graphing them
 analyzeGEB          = 1; % 1 for GEB, 0 for VET
 %-----------------------------------------------------------
 
@@ -122,7 +125,7 @@ if analyzeGEB == 0
     exps = exps(~cellfun('isempty', regexp(exps, '^\d{4}_'))); %removes any files from this list that dont start like YYYY_
     
     % Use the below to look at only one file
-    % exps = ["2025_07_07_ZZTop.csv"];
+    %exps = ["2025_07_07_ZZTop.csv"];
 
 elseif analyzeGEB == 1
     % GEB Code to execute if the condition is false
@@ -132,14 +135,14 @@ elseif analyzeGEB == 1
 
     exps = {dir(fullfile(datasubfolder, '*.csv')).name};    %identify all .csv files in folder
     exps = exps(~cellfun('isempty', regexp(exps, '^\d{4}_'))); %removes any files from this list that dont start like YYYY_
-    %exps = ["2025_11_05_Garett_cleaned.csv"];
+    %exps = ["2025_04_15_1.csv"];
 
 else
     disp('Error finding data files, check folder structure'); 
 end
 
 %If the number of experiments is large, prevent plotting all on accident
-if length(exps) > 20
+if length(exps) > 15
     doyouwantstatsonly = 1;
     disp(['Large number of experiments detected, plotting prevented, you can change the tolerance here']);
 end
@@ -190,12 +193,24 @@ for j = 1:length(exps)
     f       = flb * LBS_TO_KG; % convert lb to kilogram
     f2      = f2lb * LBS_TO_KG;
 
+    % Handle Special Cases/Corrections -----------------------------------
     % special case for 2/06
     if strcmp(exps, "2025_02_06.csv")
         disp("special case adjusting force 2/06")
         f = f + 0.724;
         f2 = f2 + 0.724;
     end
+    % special case for Camden
+    if strcmp(exps{j}, "2025_11_05_Camden_cleaned.csv")
+        disp("special case adjusting force 2/06")
+        f = f + 0.65;
+    end   
+    % special case for Atticus
+    if strcmp(exps{j}, "2025_04_15_1.csv")
+        disp("special case adjusting force on Atticus 04_15_1")
+        f2 = f2 - (-1.177/(t(end)-t(1)))*t;
+    end   
+    % -------------------------------------------------------------------
 
     fcomb   = f + f2;
 
@@ -229,7 +244,7 @@ for j = 1:length(exps)
     stats.favg(j)          = mean(fcomb);
     stats.std(j)           = std(fcomb);
     stats.var(j)           = var(fcomb);
-    stats.SessionLength(j) = t(end);
+    stats.SessionLength(j) = t(end)-t(1);
 
     if doyouwantstatsonly ~= 1
         % PLOTTING
