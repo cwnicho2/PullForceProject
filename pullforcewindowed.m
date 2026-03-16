@@ -10,7 +10,7 @@ cd(projectRoot)
 LBS_TO_KG = 0.453592;
 
 %-----------------------------------------------------------
-doyouwantstatsonly  = 1; % 1 for yes, 0 for no. Basically option to choose to skip graphing them
+doyouwantstatsonly  = 0; % 1 for yes, 0 for no. Basically option to choose to skip graphing them
 analyzeGEB          = 1; % 1 for GEB, 0 for VET
 %-----------------------------------------------------------
 
@@ -135,7 +135,7 @@ elseif analyzeGEB == 1
 
     exps = {dir(fullfile(datasubfolder, '*.csv')).name};    %identify all .csv files in folder
     exps = exps(~cellfun('isempty', regexp(exps, '^\d{4}_'))); %removes any files from this list that dont start like YYYY_
-    %exps = ["2025_04_15_1.csv"];
+    exps = ["2026_02_19_Bono.csv","2026_02_19_Rhiana.csv","2026_02_19_Zeppelin.csv","2026_02_19_Camden.csv"];
 
 else
     disp('Error finding data files, check folder structure'); 
