@@ -11,7 +11,7 @@ LBS_TO_KG = 0.453592;
 
 %-----------------------------------------------------------
 doyouwantstatsonly  = 0; % 1 for yes, 0 for no. Basically option to choose to skip graphing them
-analyzeGEB          = 1; % 1 for GEB, 0 for VET
+analyzeGEB          = 0; % 1 for GEB, 0 for VET
 %-----------------------------------------------------------
 
 % Start and Stops for the pulling windows on each dog
@@ -126,6 +126,7 @@ if analyzeGEB == 0
     
     % Use the below to look at only one file
     %exps = ["2025_07_07_ZZTop.csv"];
+    exps = ["2026_03_21_Weston.csv"]
 
 elseif analyzeGEB == 1
     % GEB Code to execute if the condition is false
@@ -135,7 +136,7 @@ elseif analyzeGEB == 1
 
     exps = {dir(fullfile(datasubfolder, '*.csv')).name};    %identify all .csv files in folder
     exps = exps(~cellfun('isempty', regexp(exps, '^\d{4}_'))); %removes any files from this list that dont start like YYYY_
-    exps = ["2026_02_19_Bono.csv","2026_02_19_Rhiana.csv","2026_02_19_Zeppelin.csv","2026_02_19_Camden.csv"];
+    % exps = ["2026_02_19_Bono.csv","2026_02_19_Rhiana.csv","2026_02_19_Zeppelin.csv","2026_02_19_Camden.csv"];
 
 else
     disp('Error finding data files, check folder structure'); 
