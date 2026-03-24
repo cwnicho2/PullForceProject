@@ -11,7 +11,7 @@ LBS_TO_KG = 0.453592;
 
 %-----------------------------------------------------------
 doyouwantstatsonly  = 0; % 1 for yes, 0 for no. Basically option to choose to skip graphing them
-analyzeGEB          = 0; % 1 for GEB, 0 for VET
+analyzeGEB          = 1; % 1 for GEB, 0 for VET
 %-----------------------------------------------------------
 
 % Start and Stops for the pulling windows on each dog
@@ -158,6 +158,9 @@ stats = table( ...
 
 % Boxplot Initialize a cell array to hold force data for each trial
 fcomb_all = cell(numFiles, 1); 
+% Set up for assymetric violin
+fL_all = cell(numFiles, 1);
+fR_all = cell(numFiles, 1);
 
 for j = 1:length(exps)
 
@@ -293,6 +296,8 @@ for j = 1:length(exps)
 
     end
     fcomb_all{j} = fcomb; % Store combined pulling force for this dog/trial
+    fL_all{j} = f;   % "Save" this specific dog's Left force
+    fR_all{j} = f2;  % "Save" this specific dog's Right force
 end 
 writetable(stats, fullfile(datasubfolder, fileout));
 disp(['Data saved to: ', fileout]);
@@ -366,6 +371,77 @@ if analyzeGEB == 1
     hold off
     legend([h_avg], { 'Average Value'}, 'Location', 'northwest');
 end
+
+% ----------------------- Assymetric Violin --------
+if analyzeGEB == 1
+    % --- 1. Prepare Bilateral Data ---
+    numDogs = length(exps);
+    leftDataAll = cell(1, numDogs);
+    rightDataAll = cell(1, numDogs);
+
+    % Initialize storage for split data
+    downsampled_L = cell(1, numel(exps));
+    downsampled_R = cell(1, numel(exps));
+    
+    for i = 1:numel(exps)
+        if validIdx(i)
+            % Process Left
+            tempL = fL_all{i};
+            % Process Right
+            tempR = fR_all{i};
+            
+            if USE_AVG
+                w = DOWNSAMPLE;
+                N = floor(length(tempL)/w);
+                % Downsample both
+                downsampled_L{i} = arrayfun(@(k) mean(tempL((k-1)*w + 1 : k*w)), 1:N)';
+                downsampled_R{i} = arrayfun(@(k) mean(tempR((k-1)*w + 1 : k*w)), 1:N)';
+            else
+                downsampled_L{i} = tempL(1:DOWNSAMPLE:end);
+                downsampled_R{i} = tempR(1:DOWNSAMPLE:end);
+            end
+        end
+    end
+
+    figure('Color', 'w');
+    hold on;
+    
+    for i = 1:numDogs
+        % Get this dog's data
+        L = downsampled_L{i}; % You'll need to save these in the j-loop
+        R = downsampled_R{i};
+        
+        % Calculate Kernel Density for Left and Right
+        [fL, xL] = ksdensity(L);
+        [fR, xR] = ksdensity(R);
+        
+        % Normalize densities so they look good scale-wise
+        fL = fL / max([fL, fR]) * 0.4; 
+        fR = fR / max([fL, fR]) * 0.4;
+        
+        % Plot Left Side (Blue-ish)
+        fill(i - fL, xL, [0.4 0.6 1], 'FaceAlpha', 0.5, 'EdgeColor', 'b');
+        % Plot Right Side (Red-ish)
+        fill(i + fR, xR, [1 0.4 0.4], 'FaceAlpha', 0.5, 'EdgeColor', 'r');
+        
+        % Add the means as horizontal lines
+        line([i-0.2, i], [mean(L) mean(L)], 'Color', 'b', 'LineWidth', 2);
+        line([i, i+0.2], [mean(R) mean(R)], 'Color', 'r', 'LineWidth', 2);
+    end
+    
+    % Formatting
+    ylabel('Pulling Force (kg)');
+    xlabel('Dog Identifier (Anonymized)');
+    xticks(1:numDogs);
+    xticklabels(dogLabels);
+    title('Bilateral Pulling Force: Left (Blue) vs Right (Red)');
+    grid on;
+    ylim([0 10]); % Adjust based on your data
+end
+
+
+
+
 
 function setFigureStyle()
     set(findobj(gcf, 'type', 'axes'), 'FontName', 'Calibri', 'FontSize', 16, ...
